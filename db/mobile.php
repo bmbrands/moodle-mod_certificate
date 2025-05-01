@@ -22,6 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$addons = array(
-    "mod_certificate" => array()
-);
+$addons = [
+    "mod_certificate" => [],
+];

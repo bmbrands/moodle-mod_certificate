@@ -23,50 +23,50 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$capabilities = array(
+$capabilities = [
 
-    'mod/certificate:addinstance' => array(
+    'mod/certificate:addinstance' => [
         'riskbitmask' => RISK_XSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
+        'archetypes' => [
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ),
-        'clonepermissionsfrom' => 'moodle/course:manageactivities'
-    ),
+            'manager' => CAP_ALLOW,
+        ],
+        'clonepermissionsfrom' => 'moodle/course:manageactivities',
+    ],
 
-    'mod/certificate:view' => array(
+    'mod/certificate:view' => [
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
+        'archetypes' => [
             'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
+            'manager' => CAP_ALLOW,
+        ],
+    ],
 
-    'mod/certificate:manage' => array(
+    'mod/certificate:manage' => [
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
+        'archetypes' => [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
+            'manager' => CAP_ALLOW,
+        ],
+    ],
 
-    'mod/certificate:printteacher' => array(
+    'mod/certificate:printteacher' => [
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
+        'archetypes' => [
             'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW
-        )
-    ),
+            'editingteacher' => CAP_ALLOW,
+        ],
+    ],
 
-);
+];

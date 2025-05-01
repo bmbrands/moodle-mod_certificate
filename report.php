@@ -44,7 +44,7 @@ if (CERT_PER_PAGE !== 0) {
     $perpage = '9999999';
 }
 
-$url = new moodle_url('/mod/certificate/report.php', array('id'=>$id, 'page' => $page, 'perpage' => $perpage));
+$url = new moodle_url('/mod/certificate/report.php', ['id' => $id, 'page' => $page, 'perpage' => $perpage]);
 if ($download) {
     $url->param('download', $download);
 }
@@ -54,15 +54,15 @@ if ($action) {
 $PAGE->set_url($url);
 
 if (!$cm = get_coursemodule_from_id('certificate', $id)) {
-    print_error('Course Module ID was incorrect');
+    throw new \moodle_exception('Course Module ID was incorrect');
 }
 
-if (!$course = $DB->get_record('course', array('id'=> $cm->course))) {
-    print_error('Course is misconfigured');
+if (!$course = $DB->get_record('course', ['id' => $cm->course])) {
+    throw new \moodle_exception('Course is misconfigured');
 }
 
-if (!$certificate = $DB->get_record('certificate', array('id'=> $cm->instance))) {
-    print_error('Certificate ID was incorrect');
+if (!$certificate = $DB->get_record('certificate', ['id' => $cm->instance])) {
+    throw new \moodle_exception('Certificate ID was incorrect');
 }
 
 // Requires a course login
@@ -77,9 +77,9 @@ $strcertificates = get_string('modulenameplural', 'certificate');
 $strcertificate  = get_string('modulename', 'certificate');
 $strto = get_string('awardedto', 'certificate');
 $strdate = get_string('receiveddate', 'certificate');
-$strgrade = get_string('grade','certificate');
+$strgrade = get_string('grade', 'certificate');
 $strcode = get_string('code', 'certificate');
-$strreport= get_string('report', 'certificate');
+$strreport = get_string('report', 'certificate');
 
 if (!$download) {
     $PAGE->navbar->add($strreport);
@@ -240,25 +240,26 @@ if ($download == "txt") {
     echo $strcode. "\n";
 
     // Generate the data for the body of the spreadsheet
-    $i=0;
-    $row=1;
-    if ($users) foreach ($users as $user) {
-        echo $user->lastname;
-        echo "\t" . $user->firstname . "\t";
-        foreach ($extrafields as $field) {
-            echo $user->$field . "\t";
-        }
-        $ug2 = '';
-        if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
-            foreach ($usergrps as $ug) {
-                $ug2 = $ug2. $ug->name;
+    $i = 0;
+    $row = 1;
+    if ($users) { foreach ($users as $user) {
+            echo $user->lastname;
+            echo "\t" . $user->firstname . "\t";
+            foreach ($extrafields as $field) {
+                echo $user->$field . "\t";
             }
-        }
-        echo $ug2 . "\t";
-        echo userdate($user->timecreated) . "\t";
-        echo certificate_get_grade($certificate, $course, $user->id) . "\t";
-        echo $user->code . "\n";
-        $row++;
+            $ug2 = '';
+            if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
+                foreach ($usergrps as $ug) {
+                    $ug2 = $ug2. $ug->name;
+                }
+            }
+            echo $ug2 . "\t";
+            echo userdate($user->timecreated) . "\t";
+            echo certificate_get_grade($certificate, $course, $user->id) . "\t";
+            echo $user->code . "\n";
+            $row++;
+    }
     }
     exit;
 }
@@ -269,34 +270,34 @@ $usercount = count(certificate_get_issues($certificate->id, $DB->sql_fullname(),
 $table = new html_table();
 $table->width = "95%";
 $table->tablealign = "center";
-$table->head = array($strto);
-$table->align = array('left');
+$table->head = [$strto];
+$table->align = ['left'];
 foreach ($extrafields as $field) {
     $table->head[] = get_user_field_name($field);
     $table->align[] = 'left';
 }
-$table->head = array_merge($table->head, array($strdate, $strgrade, $strcode));
-$table->align = array_merge($table->align, array('left', 'center', 'center'));
+$table->head = array_merge($table->head, [$strdate, $strgrade, $strcode]);
+$table->align = array_merge($table->align, ['left', 'center', 'center']);
 foreach ($users as $user) {
     $name = $OUTPUT->user_picture($user) . fullname($user);
     $date = userdate($user->timecreated) . certificate_print_user_files($certificate, $user->id, $context->id);
     $code = $user->code;
-    $data = array();
+    $data = [];
     $data[] = $name;
     foreach ($extrafields as $field) {
         $data[] = $user->$field;
     }
-    $data = array_merge($data, array($date, certificate_get_grade($certificate, $course, $user->id), $code));
+    $data = array_merge($data, [$date, certificate_get_grade($certificate, $course, $user->id), $code]);
     $table->data[] = $data;
 }
 
 // Create table to store buttons
 $tablebutton = new html_table();
 $tablebutton->attributes['class'] = 'downloadreport';
-$btndownloadods = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'ods')), get_string("downloadods"));
-$btndownloadxls = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'xls')), get_string("downloadexcel"));
-$btndownloadtxt = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'txt')), get_string("downloadtext"));
-$tablebutton->data[] = array($btndownloadods, $btndownloadxls, $btndownloadtxt);
+$btndownloadods = $OUTPUT->single_button(new moodle_url("report.php", ['id' => $cm->id, 'download' => 'ods']), get_string("downloadods"));
+$btndownloadxls = $OUTPUT->single_button(new moodle_url("report.php", ['id' => $cm->id, 'download' => 'xls']), get_string("downloadexcel"));
+$btndownloadtxt = $OUTPUT->single_button(new moodle_url("report.php", ['id' => $cm->id, 'download' => 'txt']), get_string("downloadtext"));
+$tablebutton->data[] = [$btndownloadods, $btndownloadxls, $btndownloadtxt];
 
 echo $OUTPUT->header();
 groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
@@ -304,5 +305,5 @@ echo $OUTPUT->heading(get_string('modulenameplural', 'certificate'));
 echo $OUTPUT->paging_bar($usercount, $page, $perpage, $url);
 echo '<br />';
 echo html_writer::table($table);
-echo html_writer::tag('div', html_writer::table($tablebutton), array('style' => 'margin:auto; width:50%'));
+echo html_writer::tag('div', html_writer::table($tablebutton), ['style' => 'margin:auto; width:50%']);
 echo $OUTPUT->footer($course);

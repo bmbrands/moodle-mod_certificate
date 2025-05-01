@@ -45,11 +45,11 @@ class mod_certificate_external extends external_api {
      */
     public static function get_certificates_by_courses_parameters() {
         return new external_function_parameters (
-            array(
+            [
                 'courseids' => new external_multiple_structure(
-                    new external_value(PARAM_INT, 'course id'), 'Array of course ids', VALUE_DEFAULT, array()
+                    new external_value(PARAM_INT, 'course id'), 'Array of course ids', VALUE_DEFAULT, []
                 ),
-            )
+            ]
         );
     }
 
@@ -60,13 +60,13 @@ class mod_certificate_external extends external_api {
      * @param array $courseids the course ids
      * @return array the certificate details
      */
-    public static function get_certificates_by_courses($courseids = array()) {
+    public static function get_certificates_by_courses($courseids = []) {
         global $CFG;
 
-        $returnedcertificates = array();
-        $warnings = array();
+        $returnedcertificates = [];
+        $warnings = [];
 
-        $params = self::validate_parameters(self::get_certificates_by_courses_parameters(), array('courseids' => $courseids));
+        $params = self::validate_parameters(self::get_certificates_by_courses_parameters(), ['courseids' => $courseids]);
 
         if (empty($params['courseids'])) {
             $params['courseids'] = array_keys(enrol_get_my_courses());
@@ -86,7 +86,7 @@ class mod_certificate_external extends external_api {
                 $context = context_module::instance($certificate->coursemodule);
 
                 // Entry to return.
-                $module = array();
+                $module = [];
 
                 // First, we return information that any user can see in (or can deduce from) the web interface.
                 $module['id'] = $certificate->id;
@@ -113,11 +113,11 @@ class mod_certificate_external extends external_api {
                 // Check additional permissions for returning optional private settings.
                 if (has_capability('moodle/course:manageactivities', $context)) {
 
-                    $additionalfields = array('emailteachers', 'emailothers', 'savecert',
+                    $additionalfields = ['emailteachers', 'emailothers', 'savecert',
                         'reportcert', 'delivery', 'certificatetype', 'orientation', 'borderstyle', 'bordercolor',
                         'printwmark', 'printdate', 'datefmt', 'printnumber', 'printgrade', 'gradefmt', 'printoutcome',
                         'printhours', 'printteacher', 'customtext', 'printsignature', 'printseal', 'timecreated', 'timemodified',
-                        'section', 'visible', 'groupmode', 'groupingid');
+                        'section', 'visible', 'groupmode', 'groupingid'];
                     $viewablefields = array_merge($viewablefields, $additionalfields);
 
                 }
@@ -130,7 +130,7 @@ class mod_certificate_external extends external_api {
             }
         }
 
-        $result = array();
+        $result = [];
         $result['certificates'] = $returnedcertificates;
         $result['warnings'] = $warnings;
         return $result;
@@ -144,10 +144,10 @@ class mod_certificate_external extends external_api {
     public static function get_certificates_by_courses_returns() {
 
         return new external_single_structure(
-            array(
+            [
                 'certificates' => new external_multiple_structure(
                     new external_single_structure(
-                        array(
+                        [
                             'id' => new external_value(PARAM_INT, 'Certificate id'),
                             'coursemodule' => new external_value(PARAM_INT, 'Course module id'),
                             'course' => new external_value(PARAM_INT, 'Course id'),
@@ -183,11 +183,11 @@ class mod_certificate_external extends external_api {
                             'visible' => new external_value(PARAM_INT, 'visible', VALUE_OPTIONAL),
                             'groupmode' => new external_value(PARAM_INT, 'group mode', VALUE_OPTIONAL),
                             'groupingid' => new external_value(PARAM_INT, 'group id', VALUE_OPTIONAL),
-                        ), 'Tool'
+                        ], 'Tool'
                     )
                 ),
                 'warnings' => new external_warnings(),
-            )
+            ]
         );
     }
 
@@ -198,9 +198,9 @@ class mod_certificate_external extends external_api {
      */
     public static function view_certificate_parameters() {
         return new external_function_parameters(
-            array(
-                'certificateid' => new external_value(PARAM_INT, 'certificate instance id')
-            )
+            [
+                'certificateid' => new external_value(PARAM_INT, 'certificate instance id'),
+            ]
         );
     }
 
@@ -215,24 +215,24 @@ class mod_certificate_external extends external_api {
         global $DB;
 
         $params = self::validate_parameters(self::view_certificate_parameters(),
-                                            array(
-                                                'certificateid' => $certificateid
-                                            )
+                                            [
+                                                'certificateid' => $certificateid,
+                                            ]
         );
-        $warnings = array();
+        $warnings = [];
 
         // Request and permission validation.
-        $certificate = $DB->get_record('certificate', array('id' => $params['certificateid']), '*', MUST_EXIST);
+        $certificate = $DB->get_record('certificate', ['id' => $params['certificateid']], '*', MUST_EXIST);
         list($course, $cm) = get_course_and_cm_from_instance($certificate, 'certificate');
 
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/certificate:view', $context);
 
-        $event = \mod_certificate\event\course_module_viewed::create(array(
+        $event = \mod_certificate\event\course_module_viewed::create([
             'objectid' => $certificate->id,
             'context' => $context,
-        ));
+        ]);
         $event->add_record_snapshot('course', $course);
         $event->add_record_snapshot('certificate', $certificate);
         $event->trigger();
@@ -240,7 +240,7 @@ class mod_certificate_external extends external_api {
         $completion = new completion_info($course);
         $completion->set_module_viewed($cm);
 
-        $result = array();
+        $result = [];
         $result['status'] = true;
         $result['warnings'] = $warnings;
         return $result;
@@ -253,10 +253,10 @@ class mod_certificate_external extends external_api {
      */
     public static function view_certificate_returns() {
         return new external_single_structure(
-            array(
+            [
                 'status' => new external_value(PARAM_BOOL, 'status: true if success'),
-                'warnings' => new external_warnings()
-            )
+                'warnings' => new external_warnings(),
+            ]
         );
     }
 
@@ -269,7 +269,7 @@ class mod_certificate_external extends external_api {
     private static function check_can_issue($certificateid) {
         global $DB;
 
-        $certificate = $DB->get_record('certificate', array('id' => $certificateid), '*', MUST_EXIST);
+        $certificate = $DB->get_record('certificate', ['id' => $certificateid], '*', MUST_EXIST);
         list($course, $cm) = get_course_and_cm_from_instance($certificate, 'certificate');
 
         $context = context_module::instance($cm->id);
@@ -284,7 +284,7 @@ class mod_certificate_external extends external_api {
                 throw new moodle_exception('requiredtimenotmet', 'certificate', '', $a);
             }
         }
-        return array($certificate, $course, $cm, $context);
+        return [$certificate, $course, $cm, $context];
     }
 
     /**
@@ -294,7 +294,7 @@ class mod_certificate_external extends external_api {
      */
     private static function issued_structure() {
         return new external_single_structure(
-            array(
+            [
             'id' => new external_value(PARAM_INT, 'Issue id'),
             'userid' => new external_value(PARAM_INT, 'User id'),
             'certificateid' => new external_value(PARAM_INT, 'Certificate id'),
@@ -304,7 +304,7 @@ class mod_certificate_external extends external_api {
             'fileurl' => new external_value(PARAM_URL, 'Time created'),
             'mimetype' => new external_value(PARAM_RAW, 'mime type'),
             'grade' => new external_value(PARAM_NOTAGS, 'Certificate grade', VALUE_OPTIONAL),
-            )
+            ]
         );
     }
 
@@ -340,9 +340,9 @@ class mod_certificate_external extends external_api {
      */
     public static function issue_certificate_parameters() {
         return new external_function_parameters(
-            array(
-                'certificateid' => new external_value(PARAM_INT, 'certificate instance id')
-            )
+            [
+                'certificateid' => new external_value(PARAM_INT, 'certificate instance id'),
+            ]
         );
     }
 
@@ -357,11 +357,11 @@ class mod_certificate_external extends external_api {
         global $USER;
 
         $params = self::validate_parameters(self::issue_certificate_parameters(),
-                                            array(
-                                                'certificateid' => $certificateid
-                                            )
+                                            [
+                                                'certificateid' => $certificateid,
+                                            ]
         );
-        $warnings = array();
+        $warnings = [];
 
         // Request and permission validation.
         list($certificate, $course, $cm, $context) = self::check_can_issue($params['certificateid']);
@@ -369,7 +369,7 @@ class mod_certificate_external extends external_api {
         $issue = certificate_get_issue($course, $USER, $certificate, $cm);
         self::add_extra_issue_data($issue, $certificate, $course, $cm, $context);
 
-        $result = array();
+        $result = [];
         $result['issue'] = $issue;
         $result['warnings'] = $warnings;
         return $result;
@@ -382,10 +382,10 @@ class mod_certificate_external extends external_api {
      */
     public static function issue_certificate_returns() {
         return new external_single_structure(
-            array(
+            [
                 'issue' => self::issued_structure(),
-                'warnings' => new external_warnings()
-            )
+                'warnings' => new external_warnings(),
+            ]
         );
     }
 
@@ -396,9 +396,9 @@ class mod_certificate_external extends external_api {
      */
     public static function get_issued_certificates_parameters() {
         return new external_function_parameters(
-            array(
-                'certificateid' => new external_value(PARAM_INT, 'certificate instance id')
-            )
+            [
+                'certificateid' => new external_value(PARAM_INT, 'certificate instance id'),
+            ]
         );
     }
 
@@ -412,11 +412,11 @@ class mod_certificate_external extends external_api {
     public static function get_issued_certificates($certificateid) {
 
         $params = self::validate_parameters(self::get_issued_certificates_parameters(),
-                                            array(
-                                                'certificateid' => $certificateid
-                                            )
+                                            [
+                                                'certificateid' => $certificateid,
+                                            ]
         );
-        $warnings = array();
+        $warnings = [];
 
         // Request and permission validation.
         list($certificate, $course, $cm, $context) = self::check_can_issue($params['certificateid']);
@@ -429,10 +429,10 @@ class mod_certificate_external extends external_api {
 
             }
         } else {
-            $issues = array();
+            $issues = [];
         }
 
-        $result = array();
+        $result = [];
         $result['issues'] = $issues;
         $result['warnings'] = $warnings;
         return $result;
@@ -445,10 +445,10 @@ class mod_certificate_external extends external_api {
      */
     public static function get_issued_certificates_returns() {
         return new external_single_structure(
-            array(
+            [
                 'issues' => new external_multiple_structure(self::issued_structure()),
-                'warnings' => new external_warnings()
-            )
+                'warnings' => new external_warnings(),
+            ]
         );
     }
 

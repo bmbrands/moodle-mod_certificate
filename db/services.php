@@ -23,42 +23,42 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$functions = array(
+$functions = [
 
-    'mod_certificate_get_certificates_by_courses' => array(
+    'mod_certificate_get_certificates_by_courses' => [
         'classname'     => 'mod_certificate_external',
         'methodname'    => 'get_certificates_by_courses',
         'description'   => 'Returns a list of certificate instances in a provided set of courses, if
                             no courses are provided then all the certificate instances the user has access to will be returned.',
         'type'          => 'read',
         'capabilities'  => 'mod/certificate:view',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile'),
-    ),
+        'services'      => [MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile'],
+    ],
 
-    'mod_certificate_view_certificate' => array(
+    'mod_certificate_view_certificate' => [
         'classname'     => 'mod_certificate_external',
         'methodname'    => 'view_certificate',
         'description'   => 'Trigger the course module viewed event and update the module completion status.',
         'type'          => 'write',
         'capabilities'  => 'mod/certificate:view',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile'),
-    ),
+        'services'      => [MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile'],
+    ],
 
-    'mod_certificate_issue_certificate' => array(
+    'mod_certificate_issue_certificate' => [
         'classname'     => 'mod_certificate_external',
         'methodname'    => 'issue_certificate',
         'description'   => 'Create new certificate record, or return existing record for the current user.',
         'type'          => 'write',
         'capabilities'  => 'mod/certificate:view',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile'),
-    ),
+        'services'      => [MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile'],
+    ],
 
-    'mod_certificate_get_issued_certificates' => array(
+    'mod_certificate_get_issued_certificates' => [
         'classname'     => 'mod_certificate_external',
         'methodname'    => 'get_issued_certificates',
         'description'   => 'Get the list of issued certificates for the current user.',
         'type'          => 'read',
         'capabilities'  => 'mod/certificate:view',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile'),
-    ),
-);
+        'services'      => [MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile'],
+    ],
+];

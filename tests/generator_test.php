@@ -25,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-class mod_certificate_generator_testcase extends advanced_testcase {
-    public function test_generator() {
+class generator_test extends advanced_testcase {
+    public function test_generator(): void {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -40,9 +40,9 @@ class mod_certificate_generator_testcase extends advanced_testcase {
         $this->assertInstanceOf('mod_certificate_generator', $generator);
         $this->assertEquals('certificate', $generator->get_modulename());
 
-        $generator->create_instance(array('course' => $course->id));
-        $generator->create_instance(array('course' => $course->id));
-        $certificate = $generator->create_instance(array('course' => $course->id));
+        $generator->create_instance(['course' => $course->id]);
+        $generator->create_instance(['course' => $course->id]);
+        $certificate = $generator->create_instance(['course' => $course->id]);
         $this->assertEquals(3, $DB->count_records('certificate'));
 
         $cm = get_coursemodule_from_instance('certificate', $certificate->id);

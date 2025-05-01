@@ -33,32 +33,32 @@ $action = optional_param('action', '', PARAM_ALPHA);
 $edit = optional_param('edit', -1, PARAM_BOOL);
 
 if (!$cm = get_coursemodule_from_id('certificate', $id)) {
-    print_error('Course Module ID was incorrect');
+    throw new \moodle_exception('Course Module ID was incorrect');
 }
-if (!$course = $DB->get_record('course', array('id'=> $cm->course))) {
-    print_error('course is misconfigured');
+if (!$course = $DB->get_record('course', ['id' => $cm->course])) {
+    throw new \moodle_exception('course is misconfigured');
 }
-if (!$certificate = $DB->get_record('certificate', array('id'=> $cm->instance))) {
-    print_error('course module is incorrect');
+if (!$certificate = $DB->get_record('certificate', ['id' => $cm->instance])) {
+    throw new \moodle_exception('course module is incorrect');
 }
 
 require_login($course, false, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/certificate:view', $context);
 
-$event = \mod_certificate\event\course_module_viewed::create(array(
+$event = \mod_certificate\event\course_module_viewed::create([
     'objectid' => $certificate->id,
     'context' => $context,
-));
+]);
 $event->add_record_snapshot('course', $course);
 $event->add_record_snapshot('certificate', $certificate);
 $event->trigger();
 
-$completion=new completion_info($course);
+$completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 
 // Initialize $PAGE, compute blocks
-$PAGE->set_url('/mod/certificate/view.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/certificate/view.php', ['id' => $cm->id]);
 $PAGE->set_context($context);
 $PAGE->set_cm($cm);
 $PAGE->set_title(format_string($certificate->name));
@@ -72,7 +72,7 @@ if (($edit != -1) and $PAGE->user_allowed_editing()) {
 if ($PAGE->user_allowed_editing()) {
     $editvalue = $PAGE->user_is_editing() ? 'off' : 'on';
     $strsubmit = $PAGE->user_is_editing() ? get_string('blockseditoff') : get_string('blocksediton');
-    $url = new moodle_url($CFG->wwwroot . '/mod/certificate/view.php', array('id' => $cm->id, 'edit' => $editvalue));
+    $url = new moodle_url($CFG->wwwroot . '/mod/certificate/view.php', ['id' => $cm->id, 'edit' => $editvalue]);
     $PAGE->set_button($OUTPUT->single_button($url, $strsubmit));
 }
 
@@ -97,7 +97,7 @@ require("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certif
 if (empty($action)) { // Not displaying PDF
     echo $OUTPUT->header();
 
-    $viewurl = new moodle_url('/mod/certificate/view.php', array('id' => $cm->id));
+    $viewurl = new moodle_url('/mod/certificate/view.php', ['id' => $cm->id]);
     groups_print_activity_menu($cm, $viewurl);
     $currentgroup = groups_get_activity_group($cm);
     $groupmode = groups_get_activity_groupmode($cm);
@@ -105,8 +105,8 @@ if (empty($action)) { // Not displaying PDF
     if (has_capability('mod/certificate:manage', $context)) {
         $numusers = count(certificate_get_issues($certificate->id, 'ci.timecreated ASC', $groupmode, $cm));
         $url = html_writer::tag('a', get_string('viewcertificateviews', 'certificate', $numusers),
-            array('href' => $CFG->wwwroot . '/mod/certificate/report.php?id=' . $cm->id));
-        echo html_writer::tag('div', $url, array('class' => 'reportlink'));
+            ['href' => $CFG->wwwroot . '/mod/certificate/report.php?id=' . $cm->id]);
+        echo html_writer::tag('div', $url, ['class' => 'reportlink']);
     }
 
     if (!empty($certificate->intro)) {
@@ -118,21 +118,21 @@ if (empty($action)) { // Not displaying PDF
     }
     if ($certificate->delivery == 0)    {
         $str = get_string('openwindow', 'certificate');
-    } elseif ($certificate->delivery == 1)    {
+    } else if ($certificate->delivery == 1)    {
         $str = get_string('opendownload', 'certificate');
-    } elseif ($certificate->delivery == 2)    {
+    } else if ($certificate->delivery == 2)    {
         $str = get_string('openemail', 'certificate');
     }
-    echo html_writer::tag('p', $str, array('style' => 'text-align:center'));
+    echo html_writer::tag('p', $str, ['style' => 'text-align:center']);
     $linkname = get_string('getcertificate', 'certificate');
 
     $link = new moodle_url('/mod/certificate/view.php?id='.$cm->id.'&action=get');
     $button = new single_button($link, $linkname);
     if ($certificate->delivery != 1) {
-        $button->add_action(new popup_action('click', $link, 'view' . $cm->id, array('height' => 600, 'width' => 800)));
+        $button->add_action(new popup_action('click', $link, 'view' . $cm->id, ['height' => 600, 'width' => 800]));
     }
 
-    echo html_writer::tag('div', $OUTPUT->render($button), array('style' => 'text-align:center'));
+    echo html_writer::tag('div', $OUTPUT->render($button), ['style' => 'text-align:center']);
     echo $OUTPUT->footer($course);
     exit;
 } else { // Output to pdf
@@ -154,10 +154,10 @@ if (empty($action)) { // Not displaying PDF
     if ($certificate->delivery == 0) {
         // Open in browser.
         send_file($filecontents, $filename, 0, 0, true, false, 'application/pdf');
-    } elseif ($certificate->delivery == 1) {
+    } else if ($certificate->delivery == 1) {
         // Force download.
         send_file($filecontents, $filename, 0, 0, true, true, 'application/pdf');
-    } elseif ($certificate->delivery == 2) {
+    } else if ($certificate->delivery == 2) {
         certificate_email_student($course, $certificate, $certrecord, $context, $filecontents, $filename);
         // Open in browser after sending email.
         send_file($filecontents, $filename, 0, 0, true, false, 'application/pdf');

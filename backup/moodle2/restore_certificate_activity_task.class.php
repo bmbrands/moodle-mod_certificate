@@ -51,10 +51,10 @@ class restore_certificate_activity_task extends restore_activity_task {
      * Define the contents in the activity that must be
      * processed by the link decoder
      */
-    static public function define_decode_contents() {
-        $contents = array();
+    public static function define_decode_contents() {
+        $contents = [];
 
-        $contents[] = new restore_decode_content('certificate', array('intro'), 'certificate');
+        $contents[] = new restore_decode_content('certificate', ['intro'], 'certificate');
 
         return $contents;
     }
@@ -63,8 +63,8 @@ class restore_certificate_activity_task extends restore_activity_task {
      * Define the decoding rules for links belonging
      * to the activity to be executed by the link decoder
      */
-    static public function define_decode_rules() {
-        $rules = array();
+    public static function define_decode_rules() {
+        $rules = [];
 
         $rules[] = new restore_decode_rule('CERTIFICATEVIEWBYID', '/mod/certificate/view.php?id=$1', 'course_module');
         $rules[] = new restore_decode_rule('CERTIFICATEINDEX', '/mod/certificate/index.php?id=$1', 'course');
@@ -79,8 +79,8 @@ class restore_certificate_activity_task extends restore_activity_task {
      * certificate logs. It must return one array
      * of {@link restore_log_rule} objects
      */
-    static public function define_restore_log_rules() {
-        $rules = array();
+    public static function define_restore_log_rules() {
+        $rules = [];
 
         $rules[] = new restore_log_rule('certificate', 'add', 'view.php?id={course_module}', '{certificate}');
         $rules[] = new restore_log_rule('certificate', 'update', 'view.php?id={course_module}', '{certificate}');
@@ -101,8 +101,8 @@ class restore_certificate_activity_task extends restore_activity_task {
      * by the restore final task, but are defined here at
      * activity level. All them are rules not linked to any module instance (cmid = 0)
      */
-    static public function define_restore_log_rules_for_course() {
-        $rules = array();
+    public static function define_restore_log_rules_for_course() {
+        $rules = [];
 
         // Fix old wrong uses (missing extension)
         $rules[] = new restore_log_rule('certificate', 'view all', 'index.php?id={course}', null);
@@ -124,7 +124,7 @@ class restore_certificate_activity_task extends restore_activity_task {
                 INNER JOIN {course_modules} cm
                 ON c.id = cm.instance
                 WHERE cm.id = :cmid";
-        if ($certificate = $DB->get_record_sql($sql, (array('cmid'=>$this->get_moduleid())))) {
+        if ($certificate = $DB->get_record_sql($sql, (['cmid' => $this->get_moduleid()]))) {
             // A flag to check if we need to update the database or not
             $update = false;
             if ($certificate->printdate > 2) { // If greater than 2, then it is a grade item value

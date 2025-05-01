@@ -37,28 +37,28 @@ class backup_certificate_activity_structure_step extends backup_activity_structu
         $userinfo = $this->get_setting_value('userinfo');
 
         // Define each element separated
-        $certificate = new backup_nested_element('certificate', array('id'), array(
+        $certificate = new backup_nested_element('certificate', ['id'], [
             'name', 'intro', 'introformat', 'emailteachers', 'emailothers',
             'savecert', 'reportcert', 'delivery', 'certificatetype', 'orientation',
             'borderstyle', 'bordercolor', 'printwmark', 'printdate', 'datefmt', 'printnumber',
             'printgrade', 'gradefmt', 'printoutcome', 'printhours', 'printteacher', 'customtext',
-            'printsignature', 'printseal', 'timecreated', 'timemodified'));
+            'printsignature', 'printseal', 'timecreated', 'timemodified']);
 
         $issues = new backup_nested_element('issues');
 
-        $issue = new backup_nested_element('issue', array('id'), array(
-            'certificateid', 'userid', 'timecreated', 'code'));
+        $issue = new backup_nested_element('issue', ['id'], [
+            'certificateid', 'userid', 'timecreated', 'code']);
 
         // Build the tree
         $certificate->add_child($issues);
         $issues->add_child($issue);
 
         // Define sources
-        $certificate->set_source_table('certificate', array('id' => backup::VAR_ACTIVITYID));
+        $certificate->set_source_table('certificate', ['id' => backup::VAR_ACTIVITYID]);
 
         // All the rest of elements only happen if we are including user info
         if ($userinfo) {
-            $issue->set_source_table('certificate_issues', array('certificateid' => backup::VAR_PARENTID));
+            $issue->set_source_table('certificate_issues', ['certificateid' => backup::VAR_PARENTID]);
         }
 
         // Annotate the user id's where required.

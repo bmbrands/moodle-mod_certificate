@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 $pdf = new PDF($certificate->orientation, 'pt', 'LETTER', true, 'UTF-8', false);
 
 $pdf->SetTitle($certificate->name);
-$pdf->SetProtection(array('modify'));
+$pdf->SetProtection(['modify']);
 $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetAutoPageBreak(false, 0);

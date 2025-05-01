@@ -69,7 +69,7 @@ function certificate_delete_instance($id) {
     global $DB;
 
     // Ensure the certificate exists
-    if (!$certificate = $DB->get_record('certificate', array('id' => $id))) {
+    if (!$certificate = $DB->get_record('certificate', ['id' => $id])) {
         return false;
     }
 
@@ -79,8 +79,8 @@ function certificate_delete_instance($id) {
     }
 
     $result = true;
-    $DB->delete_records('certificate_issues', array('certificateid' => $id));
-    if (!$DB->delete_records('certificate', array('id' => $id))) {
+    $DB->delete_records('certificate_issues', ['certificateid' => $id]);
+    if (!$DB->delete_records('certificate', ['id' => $id])) {
         $result = false;
     }
 
@@ -106,13 +106,13 @@ function certificate_reset_userdata($data) {
     global $DB;
 
     $componentstr = get_string('modulenameplural', 'certificate');
-    $status = array();
+    $status = [];
 
     if (!empty($data->reset_certificate)) {
         $sql = "SELECT cert.id
                   FROM {certificate} cert
                  WHERE cert.course = :courseid";
-        $params = array('courseid' => $data->courseid);
+        $params = ['courseid' => $data->courseid];
         $certificates = $DB->get_records_sql($sql, $params);
         $fs = get_file_storage();
         if ($certificates) {
@@ -126,12 +126,12 @@ function certificate_reset_userdata($data) {
         }
 
         $DB->delete_records_select('certificate_issues', "certificateid IN ($sql)", $params);
-        $status[] = array('component' => $componentstr, 'item' => get_string('removecert', 'certificate'), 'error' => false);
+        $status[] = ['component' => $componentstr, 'item' => get_string('removecert', 'certificate'), 'error' => false];
     }
     // Updating dates - shift may be negative too
     if ($data->timeshift) {
-        shift_course_mod_dates('certificate', array('timeopen', 'timeclose'), $data->timeshift, $data->courseid);
-        $status[] = array('component' => $componentstr, 'item' => get_string('datechanged'), 'error' => false);
+        shift_course_mod_dates('certificate', ['timeopen', 'timeclose'], $data->timeshift, $data->courseid);
+        $status[] = ['component' => $componentstr, 'item' => get_string('datechanged'), 'error' => false];
     }
 
     return $status;
@@ -159,7 +159,7 @@ function certificate_reset_course_form_definition(&$mform) {
  * @return array
  */
 function certificate_reset_course_form_defaults($course) {
-    return array('reset_certificate' => 1);
+    return ['reset_certificate' => 1];
 }
 
 /**
@@ -176,7 +176,7 @@ function certificate_user_outline($course, $user, $mod, $certificate) {
     global $DB;
 
     $result = new stdClass;
-    if ($issue = $DB->get_record('certificate_issues', array('certificateid' => $certificate->id, 'userid' => $user->id))) {
+    if ($issue = $DB->get_record('certificate_issues', ['certificateid' => $certificate->id, 'userid' => $user->id])) {
         $result->info = get_string('issued', 'certificate');
         $result->time = $issue->timecreated;
     } else {
@@ -200,7 +200,7 @@ function certificate_user_complete($course, $user, $mod, $certificate) {
     global $DB, $OUTPUT, $CFG;
     require_once($CFG->dirroot.'/mod/certificate/locallib.php');
 
-    if ($issue = $DB->get_record('certificate_issues', array('certificateid' => $certificate->id, 'userid' => $user->id))) {
+    if ($issue = $DB->get_record('certificate_issues', ['certificateid' => $certificate->id, 'userid' => $user->id])) {
         echo $OUTPUT->box_start();
         echo get_string('issued', 'certificate') . ": ";
         echo userdate($issue->timecreated);
@@ -227,7 +227,7 @@ function certificate_get_participants($certificateid) {
               FROM {user} u, {certificate_issues} a
              WHERE a.certificateid = :certificateid
                AND u.id = a.userid";
-    return  $DB->get_records_sql($sql, array('certificateid' => $certificateid));
+    return  $DB->get_records_sql($sql, ['certificateid' => $certificateid]);
 }
 
 /**
@@ -243,14 +243,21 @@ function certificate_get_participants($certificateid) {
  */
 function certificate_supports($feature) {
     switch ($feature) {
-        case FEATURE_GROUPS:                  return true;
-        case FEATURE_GROUPINGS:               return true;
-        case FEATURE_GROUPMEMBERSONLY:        return true;
-        case FEATURE_MOD_INTRO:               return true;
-        case FEATURE_COMPLETION_TRACKS_VIEWS: return true;
-        case FEATURE_BACKUP_MOODLE2:          return true;
+        case FEATURE_GROUPS:
+return true;
+        case FEATURE_GROUPINGS:
+return true;
+        case FEATURE_GROUPMEMBERSONLY:
+return true;
+        case FEATURE_MOD_INTRO:
+return true;
+        case FEATURE_COMPLETION_TRACKS_VIEWS:
+return true;
+        case FEATURE_BACKUP_MOODLE2:
+return true;
 
-        default: return null;
+        default:
+return null;
     }
 }
 
@@ -272,7 +279,7 @@ function certificate_pluginfile($course, $cm, $context, $filearea, $args, $force
         return false;
     }
 
-    if (!$certificate = $DB->get_record('certificate', array('id' => $cm->instance))) {
+    if (!$certificate = $DB->get_record('certificate', ['id' => $cm->instance])) {
         return false;
     }
 
@@ -282,7 +289,7 @@ function certificate_pluginfile($course, $cm, $context, $filearea, $args, $force
 
     $certrecord = (int)array_shift($args);
 
-    if (!$certrecord = $DB->get_record('certificate_issues', array('id' => $certrecord))) {
+    if (!$certrecord = $DB->get_record('certificate_issues', ['id' => $certrecord])) {
         return false;
     }
 
@@ -304,7 +311,7 @@ function certificate_pluginfile($course, $cm, $context, $filearea, $args, $force
         require_once($CFG->dirroot.'/mod/certificate/locallib.php');
         require_once("$CFG->libdir/pdflib.php");
 
-        if (!$certificate = $DB->get_record('certificate', array('id' => $certrecord->certificateid))) {
+        if (!$certificate = $DB->get_record('certificate', ['id' => $certrecord->certificateid])) {
             return false;
         }
 
@@ -328,7 +335,7 @@ function certificate_pluginfile($course, $cm, $context, $filearea, $args, $force
  * @return array
  */
 function certificate_get_view_actions() {
-    return array('view', 'view all', 'view report');
+    return ['view', 'view all', 'view report'];
 }
 
 /**
@@ -337,5 +344,5 @@ function certificate_get_view_actions() {
  * @return array
  */
 function certificate_get_post_actions() {
-    return array('received');
+    return ['received'];
 }

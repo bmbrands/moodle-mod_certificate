@@ -25,9 +25,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$logs = array(
-    array('module'=>'certificate', 'action'=>'view', 'mtable'=>'certificate', 'field'=>'name'),
-    array('module'=>'certificate', 'action'=>'add', 'mtable'=>'certificate', 'field'=>'name'),
-     array('module'=>'certificate', 'action'=>'update', 'mtable'=>'certificate', 'field'=>'name'),
-    array('module'=>'certificate', 'action'=>'received', 'mtable'=>'certificate', 'field'=>'name'),
-);
+$logs = [
+    ['module' => 'certificate', 'action' => 'view', 'mtable' => 'certificate', 'field' => 'name'],
+    ['module' => 'certificate', 'action' => 'add', 'mtable' => 'certificate', 'field' => 'name'],
+    ['module' => 'certificate', 'action' => 'update', 'mtable' => 'certificate', 'field' => 'name'],
+    ['module' => 'certificate', 'action' => 'received', 'mtable' => 'certificate', 'field' => 'name'],
+];

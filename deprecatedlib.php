@@ -46,7 +46,7 @@ function certificate_generate_date($certificate, $course) {
                 FROM {course_completions} c
                 WHERE c.userid = :userid
                 AND c.course = :courseid";
-        if ($timecompleted = $DB->get_record_sql($sql, array('userid' => $USER->id, 'courseid' => $course->id))) {
+        if ($timecompleted = $DB->get_record_sql($sql, ['userid' => $USER->id, 'courseid' => $course->id])) {
             if (!empty($timecompleted->timecompleted)) {
                 $date = $timecompleted->timecompleted;
             }
@@ -67,20 +67,20 @@ function certificate_generate_date($certificate, $course) {
  * @param stdClass $course
  * @return mixed
  */
-function certificate_print_course_grade($course){
+function certificate_print_course_grade($course) {
     debugging('certificate_print_course_grade is deprecated, please use certificate_get_grade instead. Ideally
                you should be using certificate_get_grade in your certificate type which will either get the course
                or module grade depending on your certificate settings.', DEBUG_DEVELOPER);
 
     global $USER, $DB;
 
-    if ($course_item = grade_item::fetch_course_item($course->id)) {
-        $grade = new grade_grade(array('itemid'=>$course_item->id, 'userid'=>$USER->id));
-        $course_item->gradetype = GRADE_TYPE_VALUE;
+    if ($courseitem = grade_item::fetch_course_item($course->id)) {
+        $grade = new grade_grade(['itemid' => $courseitem->id, 'userid' => $USER->id]);
+        $courseitem->gradetype = GRADE_TYPE_VALUE;
         $coursegrade = new stdClass;
-        $coursegrade->points = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_REAL, $decimals=2);
-        $coursegrade->percentage = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals=2);
-        $coursegrade->letter = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_LETTER, $decimals=0);
+        $coursegrade->points = grade_format_gradevalue($grade->finalgrade, $courseitem, true, GRADE_DISPLAY_TYPE_REAL, $decimals = 2);
+        $coursegrade->percentage = grade_format_gradevalue($grade->finalgrade, $courseitem, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals = 2);
+        $coursegrade->letter = grade_format_gradevalue($grade->finalgrade, $courseitem, true, GRADE_DISPLAY_TYPE_LETTER, $decimals = 0);
 
         return $coursegrade;
     }
@@ -96,7 +96,7 @@ function certificate_print_course_grade($course){
  * @param int $moduleid
  * @return mixed
  */
-function certificate_print_mod_grade($course, $moduleid){
+function certificate_print_mod_grade($course, $moduleid) {
     debugging('certificate_print_mod_grade is deprecated, please use certificate_get_mod_grade instead. Ideally
                you should be using certificate_get_grade in your certificate type which will either get the course
                or module grade depending on your certificate settings.', DEBUG_DEVELOPER);
@@ -108,13 +108,13 @@ function certificate_print_mod_grade($course, $moduleid){
 
 
 /**
-* Prepare to print an outcome.
-*
-* @deprecated since certificate version 2012052501
-* @param stdClass $course
-* @param int $moduleid
-* @return mixed
-*/
+ * Prepare to print an outcome.
+ *
+ * @deprecated since certificate version 2012052501
+ * @param stdClass $course
+ * @param int $moduleid
+ * @return mixed
+ */
 function certificate_print_outcome($course, $id) {
     debugging('certificate_print_outcome is deprecated, please use certificate_get_outcome instead', DEBUG_DEVELOPER);
 

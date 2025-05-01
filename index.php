@@ -29,8 +29,8 @@ require_once('locallib.php');
 $id = required_param('id', PARAM_INT);           // Course Module ID
 
 // Ensure that the course specified is valid
-if (!$course = $DB->get_record('course', array('id'=> $id))) {
-    print_error('Course ID is incorrect');
+if (!$course = $DB->get_record('course', ['id' => $id])) {
+    throw new \moodle_exception('Course ID is incorrect');
 }
 
 // Requires a login
@@ -49,15 +49,15 @@ $strsectionname = get_string('sectionname', 'format_'.$course->format);
 
 // Print the header
 $PAGE->set_pagelayout('incourse');
-$PAGE->set_url('/mod/certificate/index.php', array('id'=>$course->id));
+$PAGE->set_url('/mod/certificate/index.php', ['id' => $course->id]);
 $PAGE->navbar->add($strcertificates);
 $PAGE->set_title($strcertificates);
 $PAGE->set_heading($course->fullname);
 
 // Add the page view to the Moodle log
-$event = \mod_certificate\event\course_module_instance_list_viewed::create(array(
-    'context' => context_course::instance($course->id)
-));
+$event = \mod_certificate\event\course_module_instance_list_viewed::create([
+    'context' => context_course::instance($course->id),
+]);
 $event->add_record_snapshot('course', $course);
 $event->trigger();
 
@@ -74,20 +74,20 @@ $usesections = course_format_uses_sections($course->format);
 $table = new html_table();
 
 if ($usesections) {
-    $table->head  = array ($strsectionname, $strname, $strissued);
+    $table->head  = [$strsectionname, $strname, $strissued];
 } else {
-    $table->head  = array ($strname, $strissued);
+    $table->head  = [$strname, $strissued];
 }
 
 foreach ($certificates as $certificate) {
     if (!$certificate->visible) {
         // Show dimmed if the mod is hidden
-        $link = html_writer::tag('a', $certificate->name, array('class' => 'dimmed',
-            'href' => $CFG->wwwroot . '/mod/certificate/view.php?id=' . $certificate->coursemodule));
+        $link = html_writer::tag('a', $certificate->name, ['class' => 'dimmed',
+            'href' => $CFG->wwwroot . '/mod/certificate/view.php?id=' . $certificate->coursemodule]);
     } else {
         // Show normal if the mod is visible
-        $link = html_writer::tag('a', $certificate->name, array('class' => 'dimmed',
-            'href' => $CFG->wwwroot . '/mod/certificate/view.php?id=' . $certificate->coursemodule));
+        $link = html_writer::tag('a', $certificate->name, ['class' => 'dimmed',
+            'href' => $CFG->wwwroot . '/mod/certificate/view.php?id=' . $certificate->coursemodule]);
     }
 
     $strsection = '';
@@ -102,16 +102,16 @@ foreach ($certificates as $certificate) {
     }
 
     // Get the latest certificate issue
-    if ($certrecord = $DB->get_record('certificate_issues', array('userid' => $USER->id, 'certificateid' => $certificate->id))) {
+    if ($certrecord = $DB->get_record('certificate_issues', ['userid' => $USER->id, 'certificateid' => $certificate->id])) {
         $issued = userdate($certrecord->timecreated);
     } else {
         $issued = get_string('notreceived', 'certificate');
     }
 
     if ($usesections) {
-        $table->data[] = array ($strsection, $link, $issued);
+        $table->data[] = [$strsection, $link, $issued];
     } else {
-        $table->data[] = array ($link, $issued);
+        $table->data[] = [$link, $issued];
     }
 }
 

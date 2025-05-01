@@ -54,17 +54,17 @@ class mod_certificate_admin_setting_font extends admin_setting_configselect {
         $doc = new pdf();
 
         if (method_exists($doc, 'get_font_families')) {
-            $this->choices = array();
+            $this->choices = [];
             $fontfamilies = $doc->get_font_families();
             foreach ($fontfamilies as $family => $fonts) {
                 $this->choices[$family] = $family;
             }
 
         } else {
-            $this->choices = array(
+            $this->choices = [
                 'freeserif' => 'freeserif',
                 'freesans' => 'freesans',
-            );
+            ];
         }
 
         return true;

@@ -50,18 +50,18 @@ class backup_certificate_activity_task extends backup_activity_task {
      * Code the transformations to perform in the activity in
      * order to get transportable (encoded) links
      */
-    static public function encode_content_links($content) {
+    public static function encode_content_links($content) {
         global $CFG;
 
-        $base = preg_quote($CFG->wwwroot,"/");
+        $base = preg_quote($CFG->wwwroot, "/");
 
         // Link to the list of certificates
-        $search="/(".$base."\/mod\/certificate\/index.php\?id\=)([0-9]+)/";
-        $content= preg_replace($search, '$@CERTIFICATEINDEX*$2@$', $content);
+        $search = "/(".$base."\/mod\/certificate\/index.php\?id\=)([0-9]+)/";
+        $content = preg_replace($search, '$@CERTIFICATEINDEX*$2@$', $content);
 
         // Link to certificate view by moduleid
-        $search="/(".$base."\/mod\/certificate\/view.php\?id\=)([0-9]+)/";
-        $content= preg_replace($search, '$@CERTIFICATEVIEWBYID*$2@$', $content);
+        $search = "/(".$base."\/mod\/certificate\/view.php\?id\=)([0-9]+)/";
+        $content = preg_replace($search, '$@CERTIFICATEVIEWBYID*$2@$', $content);
 
         return $content;
     }

@@ -50,7 +50,7 @@ class mod_certificate_generator extends testing_module_generator {
             throw new coding_exception('module generator requires $record->course');
         }
 
-        $defaults = array();
+        $defaults = [];
         $defaults['name'] = get_string('pluginname', 'certificate').' '.$i;
         $defaults['intro'] = 'Test certificate '.$i;
         $defaults['introformat'] = FORMAT_MOODLE;

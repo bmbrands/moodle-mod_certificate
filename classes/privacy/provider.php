@@ -86,7 +86,7 @@ class provider implements
         $params = [
                 'modname' => 'certificate',
                 'contextlevel' => CONTEXT_MODULE,
-                'userid' => $userid
+                'userid' => $userid,
         ];
 
         $contextlist->add_from_sql($sql, $params);
@@ -190,7 +190,7 @@ class provider implements
         $params = [
                 'modname' => 'certificate',
                 'contextlevel' => CONTEXT_MODULE,
-                'contextid' => $context->id
+                'contextid' => $context->id,
         ];
 
         $records = $DB->get_records_sql($sql, $params);
@@ -226,7 +226,7 @@ class provider implements
                     'modname' => 'certificate',
                     'contextlevel' => CONTEXT_MODULE,
                     'userid' => $user->id,
-                    'modcontextid' => $context->id
+                    'modcontextid' => $context->id,
             ];
 
             $records = $DB->get_records_sql($sql, $params);

@@ -83,9 +83,9 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $table->add_field('linkid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'certificate_id');
         $table->add_field('linkgrade', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'linkid');
         $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'linkgrade');
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
-        $table->add_index('certificate_id', XMLDB_INDEX_NOTUNIQUE, array('certificate_id'));
-        $table->add_index('linkid', XMLDB_INDEX_NOTUNIQUE, array('linkid'));
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id'], null, null);
+        $table->add_index('certificate_id', XMLDB_INDEX_NOTUNIQUE, ['certificate_id']);
+        $table->add_index('linkid', XMLDB_INDEX_NOTUNIQUE, ['linkid']);
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }
@@ -140,7 +140,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2008080904, 'certificate');
     }
 
-    //===== 2.0 or older upgrade line ======//
+    // ===== 2.0 or older upgrade line ======//
 
     // Note, fresh 1.9 installs add the version 2009080900, so they miss this when upgrading from 1.9 -> 2.0.
     if ($oldversion < 2009062900) {
@@ -162,20 +162,20 @@ function xmldb_certificate_upgrade($oldversion=0) {
         }
 
         // Set default orientation accordingly
-        $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'portrait'));
-        $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'letter_portrait'));
-        $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'unicode_portrait'));
-        $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'landscape'));
-        $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'letter_landscape'));
-        $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'unicode_landscape'));
+        $DB->set_field('certificate', 'orientation', 'P', ['certificatetype' => 'portrait']);
+        $DB->set_field('certificate', 'orientation', 'P', ['certificatetype' => 'letter_portrait']);
+        $DB->set_field('certificate', 'orientation', 'P', ['certificatetype' => 'unicode_portrait']);
+        $DB->set_field('certificate', 'orientation', 'L', ['certificatetype' => 'landscape']);
+        $DB->set_field('certificate', 'orientation', 'L', ['certificatetype' => 'letter_landscape']);
+        $DB->set_field('certificate', 'orientation', 'L', ['certificatetype' => 'unicode_landscape']);
 
         // Update all the certificate types
-        $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', array('certificatetype' => 'landscape'));
-        $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', array('certificatetype' => 'portrait'));
-        $DB->set_field('certificate', 'certificatetype', 'A4_embedded', array('certificatetype' => 'unicode_landscape'));
-        $DB->set_field('certificate', 'certificatetype', 'A4_embedded', array('certificatetype' => 'unicode_portrait'));
-        $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_landscape'));
-        $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_portrait'));
+        $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', ['certificatetype' => 'landscape']);
+        $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', ['certificatetype' => 'portrait']);
+        $DB->set_field('certificate', 'certificatetype', 'A4_embedded', ['certificatetype' => 'unicode_landscape']);
+        $DB->set_field('certificate', 'certificatetype', 'A4_embedded', ['certificatetype' => 'unicode_portrait']);
+        $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', ['certificatetype' => 'letter_landscape']);
+        $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', ['certificatetype' => 'letter_portrait']);
 
         // savepoint reached
         upgrade_mod_savepoint(true, 2009062900, 'certificate');
@@ -232,12 +232,12 @@ function xmldb_certificate_upgrade($oldversion=0) {
                         // Not valid skip it
                         continue;
                     }
-                    if (!$gradeitem = $DB->get_record('grade_items', array('courseid' => $cm->course, 'itemtype' => 'course'))) {
+                    if (!$gradeitem = $DB->get_record('grade_items', ['courseid' => $cm->course, 'itemtype' => 'course'])) {
                         // Not valid skip it
                         continue;
                     }
-                    $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
-                    $condition_info->add_grade_condition($gradeitem->id, $cert->requiredgrade, '110');
+                    $conditioninfo = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
+                    $conditioninfo->add_grade_condition($gradeitem->id, $cert->requiredgrade, '110');
                 }
             }
             // Fresh installs won't have this table, but upgrades will
@@ -274,12 +274,12 @@ function xmldb_certificate_upgrade($oldversion=0) {
                             WHERE cm.id = :cmid
                             AND cm.course = :courseid
                             AND cm.instance = gi.iteminstance";
-                    if (!$gradeitem = $DB->get_record_sql($sql, array('cmid'=>$link->linkid, 'courseid'=>$cm->course))) {
+                    if (!$gradeitem = $DB->get_record_sql($sql, ['cmid' => $link->linkid, 'courseid' => $cm->course])) {
                         // Not valid skip it
                         continue;
                     }
-                    $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
-                    $condition_info->add_grade_condition($gradeitem->id, $link->linkgrade, '110', true);
+                    $conditioninfo = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
+                    $conditioninfo->add_grade_condition($gradeitem->id, $link->linkgrade, '110', true);
                 }
             }
         }
@@ -293,12 +293,12 @@ function xmldb_certificate_upgrade($oldversion=0) {
         // New orientation field needs a value in order to view the cert, otherwise you get
         // an issue with FPDF and invalid orientation. This should be done during the upgrade,
         // but due to version number issues it is possible it was not executed, so do it now.
-        $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'portrait'));
-        $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'letter_portrait'));
-        $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'unicode_portrait'));
-        $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'landscape'));
-        $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'letter_landscape'));
-        $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'unicode_landscape'));
+        $DB->set_field('certificate', 'orientation', 'P', ['certificatetype' => 'portrait']);
+        $DB->set_field('certificate', 'orientation', 'P', ['certificatetype' => 'letter_portrait']);
+        $DB->set_field('certificate', 'orientation', 'P', ['certificatetype' => 'unicode_portrait']);
+        $DB->set_field('certificate', 'orientation', 'L', ['certificatetype' => 'landscape']);
+        $DB->set_field('certificate', 'orientation', 'L', ['certificatetype' => 'letter_landscape']);
+        $DB->set_field('certificate', 'orientation', 'L', ['certificatetype' => 'unicode_landscape']);
 
         // If the certificate type does not match any of the orientations in the above then set to 'L'
         $sql = "UPDATE {certificate}
@@ -307,12 +307,12 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $DB->execute($sql);
 
         // Update all the certificate types
-        $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', array('certificatetype' => 'landscape'));
-        $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', array('certificatetype' => 'portrait'));
-        $DB->set_field('certificate', 'certificatetype', 'A4_embedded', array('certificatetype' => 'unicode_landscape'));
-        $DB->set_field('certificate', 'certificatetype', 'A4_embedded', array('certificatetype' => 'unicode_portrait'));
-        $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_landscape'));
-        $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_portrait'));
+        $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', ['certificatetype' => 'landscape']);
+        $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', ['certificatetype' => 'portrait']);
+        $DB->set_field('certificate', 'certificatetype', 'A4_embedded', ['certificatetype' => 'unicode_landscape']);
+        $DB->set_field('certificate', 'certificatetype', 'A4_embedded', ['certificatetype' => 'unicode_portrait']);
+        $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', ['certificatetype' => 'letter_landscape']);
+        $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', ['certificatetype' => 'letter_portrait']);
 
         // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2011110103, 'certificate');
@@ -404,7 +404,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
                     // If the link id is '-1' then the setting applies to the time spent in the course
                     if ($link->linkid == '-1') {
                         // Make sure the certificate exists
-                        if ($certificate = $DB->get_record('certificate', array('id' => $link->certificate_id))) {
+                        if ($certificate = $DB->get_record('certificate', ['id' => $link->certificate_id])) {
                             $certificate->requiredtime = $link->linkgrade;
                             $DB->update_record('certificate', $certificate);
                         }

@@ -36,7 +36,7 @@ use mod_certificate\privacy\provider;
  * @copyright 2018 Huong Nguyen <huongnv13@gmail.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\provider_testcase {
+class privacy_test extends \core_privacy\tests\provider_testcase {
 
     protected $currentuser = '';
     protected $course = '';
@@ -62,7 +62,7 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
         $course = $this->getDataGenerator()->create_course();
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_certificate');
         $user = $this->getDataGenerator()->create_user();
-        $certificate = $generator->create_instance(array('course' => $course->id));
+        $certificate = $generator->create_instance(['course' => $course->id]);
         $cm = get_coursemodule_from_id('certificate', $certificate->cmid);
         $issue = certificate_get_issue($course, $user, $certificate, $cm);
         $context = context_module::instance($certificate->cmid);
@@ -86,7 +86,7 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
     /**
      * Test for provider::get_users_in_context().
      */
-    public function test_get_users_in_context() {
+    public function test_get_users_in_context(): void {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();
@@ -129,7 +129,7 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
     /**
      * Test get context for userid.
      */
-    public function test_get_contexts_for_userid() {
+    public function test_get_contexts_for_userid(): void {
         $contextlist = provider::get_contexts_for_userid($this->currentuser->id);
         $context = context_module::instance($this->certificate->cmid);
 
@@ -140,7 +140,7 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
     /**
      * Test that data is exported correctly for this plugin.
      */
-    public function test_export_user_data() {
+    public function test_export_user_data(): void {
         $user = $this->currentuser;
         $context = context_module::instance($this->certificate->cmid);
         $contextids = provider::get_contexts_for_userid($user->id)->get_contextids();
@@ -161,7 +161,7 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
     /**
      * Test delete data for user.
      */
-    public function test_delete_data_for_user() {
+    public function test_delete_data_for_user(): void {
         $user = $this->currentuser;
         $context = context_module::instance($this->certificate->cmid);
         $fs = get_file_storage();
@@ -182,7 +182,7 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
     /**
      *  Test delete data for all users in context.
      */
-    public function test_delete_data_for_all_users_in_context() {
+    public function test_delete_data_for_all_users_in_context(): void {
         global $DB;
 
         $user = $this->currentuser;
@@ -208,7 +208,7 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
     /**
      * Test for provider::delete_data_for_users().
      */
-    public function test_delete_data_for_users() {
+    public function test_delete_data_for_users(): void {
         global $DB;
 
         $this->resetAfterTest();
@@ -256,7 +256,7 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
     /**
      * Test for provider::get_users_in_context() with invalid context type.
      */
-    public function test_get_users_in_context_invalid_context_type() {
+    public function test_get_users_in_context_invalid_context_type(): void {
         $systemcontext = context_system::instance();
         $userlist = new \core_privacy\local\request\userlist($systemcontext, 'mod_certificate');
         \mod_certificate\privacy\provider::get_users_in_context($userlist);

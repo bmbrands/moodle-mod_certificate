@@ -63,9 +63,9 @@ function certificate_get_teachers($certificate, $user, $course, $cm) {
     $potteachers = get_users_by_capability($context, 'mod/certificate:manage',
         '', '', '', '', '', '', false, false);
     if (empty($potteachers)) {
-        return array();
+        return [];
     }
-    $teachers = array();
+    $teachers = [];
     if (groups_get_activity_groupmode($cm, $course) == SEPARATEGROUPS) {   // Separate groups are being used
         if ($groups = groups_get_all_groups($course->id, $user->id)) {  // Try to find all groups
             foreach ($groups as $group) {
@@ -84,7 +84,7 @@ function certificate_get_teachers($certificate, $user, $course, $cm) {
                 if ($t->id == $USER->id) {
                     continue; // do not send self
                 }
-                if (!groups_get_all_groups($course->id, $t->id)) { //ugly hack
+                if (!groups_get_all_groups($course->id, $t->id)) { // ugly hack
                     $teachers[$t->id] = $t;
                 }
             }
@@ -117,22 +117,22 @@ function certificate_email_teachers($course, $certificate, $certrecord, $cm) {
         return;
     }
 
-    $user = $DB->get_record('user', array('id' => $certrecord->userid));
+    $user = $DB->get_record('user', ['id' => $certrecord->userid]);
 
     if ($teachers = certificate_get_teachers($certificate, $user, $course, $cm)) {
         $strawarded = get_string('awarded', 'certificate');
         foreach ($teachers as $teacher) {
             $info = new stdClass;
             $info->student = fullname($USER);
-            $info->course = format_string($course->fullname,true);
-            $info->certificate = format_string($certificate->name,true);
+            $info->course = format_string($course->fullname, true);
+            $info->certificate = format_string($certificate->name, true);
             $info->url = $CFG->wwwroot.'/mod/certificate/report.php?id='.$cm->id;
             $from = $USER;
             $postsubject = $strawarded . ': ' . $info->student . ' -> ' . $certificate->name;
             $posttext = certificate_email_teachers_text($info);
             $posthtml = ($teacher->mailformat == 1) ? certificate_email_teachers_html($info) : '';
 
-            @email_to_user($teacher, $from, $postsubject, $posttext, $posthtml);  // If it fails, oh well, too bad.
+            email_to_user($teacher, $from, $postsubject, $posttext, $posthtml);  // If it fails, oh well, too bad.
         }
     }
 }
@@ -171,7 +171,7 @@ function certificate_email_others($course, $certificate, $certrecord, $cm) {
                     $posttext = certificate_email_teachers_text($info);
                     $posthtml = certificate_email_teachers_html($info);
 
-                    @email_to_user($destination, $from, $postsubject, $posttext, $posthtml);  // If it fails, oh well, too bad.
+                    email_to_user($destination, $from, $postsubject, $posttext, $posthtml);  // If it fails, oh well, too bad.
                 }
             }
         }
@@ -293,7 +293,7 @@ function certificate_save_pdf($pdf, $certrecordid, $filename, $contextid) {
     $component = 'mod_certificate';
     $filearea = 'issue';
     $filepath = '/';
-    $fileinfo = array(
+    $fileinfo = [
         'contextid' => $contextid,   // ID of context
         'component' => $component,   // usually = table name
         'filearea'  => $filearea,     // usually = table name
@@ -301,7 +301,7 @@ function certificate_save_pdf($pdf, $certrecordid, $filename, $contextid) {
         'filepath'  => $filepath,     // any path beginning and ending in /
         'filename'  => $filename,    // any filename
         'mimetype'  => 'application/pdf',    // any filename
-        'userid'    => $USER->id);
+        'userid'    => $USER->id];
 
     // We do not know the previous file name, better delete everything here,
     // luckily there is supposed to be always only one certificate here.
@@ -325,7 +325,7 @@ function certificate_print_user_files($certificate, $userid, $contextid) {
 
     $output = '';
 
-    $certrecord = $DB->get_record('certificate_issues', array('userid' => $userid, 'certificateid' => $certificate->id));
+    $certrecord = $DB->get_record('certificate_issues', ['userid' => $userid, 'certificateid' => $certificate->id]);
     $fs = get_file_storage();
 
     $component = 'mod_certificate';
@@ -359,7 +359,7 @@ function certificate_get_issue($course, $user, $certificate, $cm) {
     global $DB;
 
     // Check if there is an issue already, should only ever be one
-    if ($certissue = $DB->get_record('certificate_issues', array('userid' => $user->id, 'certificateid' => $certificate->id))) {
+    if ($certissue = $DB->get_record('certificate_issues', ['userid' => $user->id, 'certificateid' => $certificate->id])) {
         return $certissue;
     }
 
@@ -368,7 +368,7 @@ function certificate_get_issue($course, $user, $certificate, $cm) {
     $certissue->certificateid = $certificate->id;
     $certissue->userid = $user->id;
     $certissue->code = certificate_generate_code();
-    $certissue->timecreated =  time();
+    $certissue->timecreated = time();
     $certissue->id = $DB->insert_record('certificate_issues', $certissue);
 
     // Email to the teachers and anyone else
@@ -394,7 +394,7 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
 
     $context = context_module::instance($cm->id);
     $conditionssql = '';
-    $conditionsparams = array();
+    $conditionsparams = [];
 
     // Get all users that can manage this certificate to exclude them from the report.
     $certmanagers = array_keys(get_users_by_capability($context, 'mod/certificate:manage', 'u.id'));
@@ -409,30 +409,30 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
 
         // If we are viewing all participants and the user does not have access to all groups then return nothing.
         if (!$currentgroup && !$canaccessallgroups) {
-            return array();
+            return [];
         }
 
         if ($currentgroup) {
             if (!$canaccessallgroups) {
                 // Guest users do not belong to any groups.
                 if (isguestuser()) {
-                    return array();
+                    return [];
                 }
 
                 // Check that the user belongs to the group we are viewing.
                 $usersgroups = groups_get_all_groups($cm->course, $USER->id, $cm->groupingid);
                 if ($usersgroups) {
                     if (!isset($usersgroups[$currentgroup])) {
-                        return array();
+                        return [];
                     }
                 } else { // They belong to no group, so return an empty array.
-                    return array();
+                    return [];
                 }
             }
 
             $groupusers = array_keys(groups_get_members($currentgroup, 'u.*'));
             if (empty($groupusers)) {
-                return array();
+                return [];
             }
 
             list($sql, $params) = $DB->get_in_or_equal($groupusers, SQL_PARAMS_NAMED, 'grp');
@@ -445,11 +445,11 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
     $perpage = (int) $perpage;
 
     // Get all the users that have certificates issued, should only be one issue per user for a certificate
-    $allparams = $conditionsparams + array('certificateid' => $certificateid);
+    $allparams = $conditionsparams + ['certificateid' => $certificateid];
 
     // The picture fields also include the name fields for the user.
     $userfieldsapi = \core_user\fields::for_userpic();
-    $picturefields = $userfieldsapi->get_sql('u', false, '', 'userid', false)->selects;
+    $picturefields = $userfieldsapi->get_sql('u', false, '', '', false)->selects;
     $users = $DB->get_records_sql("SELECT $picturefields, u.idnumber, ci.code, ci.timecreated
                                      FROM {user} u
                                INNER JOIN {certificate_issues} ci
@@ -474,7 +474,7 @@ function certificate_get_attempts($certificateid) {
               FROM {certificate_issues} i
              WHERE certificateid = :certificateid
                AND userid = :userid";
-    if ($issues = $DB->get_records_sql($sql, array('certificateid' => $certificateid, 'userid' => $USER->id))) {
+    if ($issues = $DB->get_records_sql($sql, ['certificateid' => $certificateid, 'userid' => $USER->id])) {
         return $issues;
     }
 
@@ -497,18 +497,18 @@ function certificate_print_attempts($course, $certificate, $attempts) {
     // Prepare table header
     $table = new html_table();
     $table->class = 'generaltable';
-    $table->head = array(get_string('issued', 'certificate'));
-    $table->align = array('left');
-    $table->attributes = array("style" => "width:20%; margin:auto");
+    $table->head = [get_string('issued', 'certificate')];
+    $table->align = ['left'];
+    $table->attributes = ["style" => "width:20%; margin:auto"];
     $gradecolumn = $certificate->printgrade;
     if ($gradecolumn) {
-        $table->head[] = get_string('grade');
+        $table->head[] = get_string('grades');
         $table->align[] = 'center';
         $table->size[] = '';
     }
     // One row for each attempt
     foreach ($attempts as $attempt) {
-        $row = array();
+        $row = [];
 
         // prepare strings for time taken and date completed
         $datecompleted = userdate($attempt->timecreated);
@@ -565,7 +565,7 @@ function certificate_get_course_time($courseid) {
              WHERE userid = :userid
                AND $coursefield = :courseid
           ORDER BY $timefield ASC";
-    $params = array('userid' => $USER->id, 'courseid' => $courseid);
+    $params = ['userid' => $USER->id, 'courseid' => $courseid];
 
     $totaltime = 0;
     if ($logs = $DB->get_recordset_sql($sql, $params)) {
@@ -610,7 +610,7 @@ function certificate_get_mods() {
     $modinfo = get_fast_modinfo($COURSE);
     $mods = $modinfo->get_cms();
 
-    $modules = array();
+    $modules = [];
     $sections = $modinfo->get_section_info_all();
     for ($i = 0; $i <= count($sections) - 1; $i++) {
         // should always be true
@@ -634,10 +634,10 @@ function certificate_get_mods() {
                         continue;
                     }
                     $mod = $mods[$sectionmod];
-                    $instance = $DB->get_record($mod->modname, array('id' => $mod->instance));
-                    if ($grade_items = grade_get_grade_items_for_activity($mod)) {
-                        $mod_item = grade_get_grades($COURSE->id, 'mod', $mod->modname, $mod->instance);
-                        $item = reset($mod_item->items);
+                    $instance = $DB->get_record($mod->modname, ['id' => $mod->instance]);
+                    if ($gradeitems = grade_get_grade_items_for_activity($mod)) {
+                        $moditem = grade_get_grades($COURSE->id, 'mod', $mod->modname, $mod->instance);
+                        $item = reset($moditem->items);
                         if (isset($item->grademax)){
                             $modules[$mod->id] = $sectionlabel . ' ' . $section->section . ' : ' . $instance->name;
                         }
@@ -682,17 +682,17 @@ function certificate_get_date_options() {
  * @return array
  */
 function certificate_get_grade_categories($courseid) {
-    $grade_category_options = array();
+    $gradecategoryoptions = [];
 
-    if ($grade_categories = grade_category::fetch_all(array('courseid' => $courseid))) {
-        foreach ($grade_categories as $grade_category) {
-            if (!$grade_category->is_course_category()) {
-                $grade_category_options[-$grade_category->id] = get_string('category') . ' : ' . $grade_category->get_name();
+    if ($gradecategories = grade_category::fetch_all(['courseid' => $courseid])) {
+        foreach ($gradecategories as $gradecategory) {
+            if (!$gradecategory->is_course_category()) {
+                $gradecategoryoptions[-$gradecategory->id] = get_string('category') . ' : ' . $gradecategory->get_name();
             }
         }
     }
 
-    return $grade_category_options;
+    return $gradecategoryoptions;
 }
 
 /**
@@ -704,14 +704,14 @@ function certificate_get_outcomes() {
     global $COURSE;
 
     // get all outcomes in course
-    $grade_seq = new grade_tree($COURSE->id, false, true, '', false);
-    if ($grade_items = $grade_seq->items) {
+    $gradeseq = new grade_tree($COURSE->id, false, true, '', false);
+    if ($gradeitems = $gradeseq->items) {
         // list of item for menu
-        $printoutcome = array();
-        foreach ($grade_items as $grade_item) {
-            if (isset($grade_item->outcomeid)){
-                $itemmodule = $grade_item->itemmodule;
-                $printoutcome[$grade_item->id] = $itemmodule . ': ' . $grade_item->get_name();
+        $printoutcome = [];
+        foreach ($gradeitems as $gradeitem) {
+            if (isset($gradeitem->outcomeid)){
+                $itemmodule = $gradeitem->itemmodule;
+                $printoutcome[$gradeitem->id] = $itemmodule . ': ' . $gradeitem->get_name();
             }
         }
     }
@@ -734,7 +734,7 @@ function certificate_get_outcomes() {
  * @return array containing the certificate type
  */
 function certificate_types() {
-    $types = array();
+    $types = [];
     $names = get_list_of_plugins('mod/certificate/type');
     $sm = get_string_manager();
     foreach ($names as $name) {
@@ -777,7 +777,7 @@ function certificate_get_images($type) {
     }
     // If valid path
     if (!empty($path)) {
-        $options = array();
+        $options = [];
         $options += certificate_scan_image_dir($path);
         $options += certificate_scan_image_dir($uploadpath);
 
@@ -785,11 +785,11 @@ function certificate_get_images($type) {
         ksort($options);
 
         // Add the 'no' option to the top of the array
-        $options = array_merge(array('0' => get_string('no')), $options);
+        $options = array_merge(['0' => get_string('no')], $options);
 
         return $options;
     } else {
-        return array();
+        return [];
     }
 }
 
@@ -804,19 +804,19 @@ function certificate_get_images($type) {
 function certificate_get_mod_grade($course, $moduleid, $userid) {
     global $DB;
 
-    $cm = $DB->get_record('course_modules', array('id' => $moduleid));
-    $module = $DB->get_record('modules', array('id' => $cm->module));
+    $cm = $DB->get_record('course_modules', ['id' => $moduleid]);
+    $module = $DB->get_record('modules', ['id' => $cm->module]);
 
-    $grade_item = grade_get_grades($course->id, 'mod', $module->name, $cm->instance, $userid);
-    if (!empty($grade_item)) {
+    $gradeitem = grade_get_grades($course->id, 'mod', $module->name, $cm->instance, $userid);
+    if (!empty($gradeitem)) {
         $item = new grade_item();
-        $itemproperties = reset($grade_item->items);
+        $itemproperties = reset($gradeitem->items);
         foreach ($itemproperties as $key => $value) {
             $item->$key = $value;
         }
         $modinfo = new stdClass;
-        $modname = $DB->get_field($module->name, 'name', array('id' => $cm->instance));
-        $modinfo->name = format_string($modname, true, array('context' => context_module::instance($cm->id)));
+        $modname = $DB->get_field($module->name, 'name', ['id' => $cm->instance]);
+        $modinfo->name = format_string($modname, true, ['context' => context_module::instance($cm->id)]);
         $grade = $item->grades[$userid]->grade;
         $item->gradetype = GRADE_TYPE_VALUE;
         $item->courseid = $course->id;
@@ -861,7 +861,7 @@ function certificate_get_date($certificate, $certrecord, $course, $userid = null
                   FROM {course_completions} c
                  WHERE c.userid = :userid
                    AND c.course = :courseid";
-        if ($timecompleted = $DB->get_record_sql($sql, array('userid' => $userid, 'courseid' => $course->id))) {
+        if ($timecompleted = $DB->get_record_sql($sql, ['userid' => $userid, 'courseid' => $course->id])) {
             if (!empty($timecompleted->timecompleted)) {
                 $date = $timecompleted->timecompleted;
             }
@@ -899,12 +899,15 @@ function certificate_get_date($certificate, $certrecord, $course, $userid = null
  * @return string the suffix.
  */
 function certificate_get_ordinal_number_suffix($day) {
-    if (!in_array(($day % 100), array(11, 12, 13))) {
+    if (!in_array(($day % 100), [11, 12, 13])) {
         switch ($day % 10) {
             // Handle 1st, 2nd, 3rd
-            case 1: return 'st';
-            case 2: return 'nd';
-            case 3: return 'rd';
+            case 1:
+return 'st';
+            case 2:
+return 'nd';
+            case 3:
+return 'rd';
         }
     }
     return 'th';
@@ -928,19 +931,19 @@ function certificate_get_grade($certificate, $course, $userid = null, $valueonly
 
     if ($certificate->printgrade > 0) {
         if ($certificate->printgrade == 1) {
-            if ($course_item = grade_item::fetch_course_item($course->id)) {
+            if ($courseitem = grade_item::fetch_course_item($course->id)) {
                 // Check we want to add a prefix to the grade.
                 $strprefix = '';
                 if (!$valueonly) {
                     $strprefix = get_string('coursegrade', 'certificate') . ': ';
                 }
 
-                $grade = new grade_grade(array('itemid' => $course_item->id, 'userid' => $userid));
-                $course_item->gradetype = GRADE_TYPE_VALUE;
+                $grade = new grade_grade(['itemid' => $courseitem->id, 'userid' => $userid]);
+                $courseitem->gradetype = GRADE_TYPE_VALUE;
                 $coursegrade = new stdClass;
-                $coursegrade->points = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_REAL, $decimals = 2);
-                $coursegrade->percentage = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals = 2);
-                $coursegrade->letter = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_LETTER, $decimals = 0);
+                $coursegrade->points = grade_format_gradevalue($grade->finalgrade, $courseitem, true, GRADE_DISPLAY_TYPE_REAL, $decimals = 2);
+                $coursegrade->percentage = grade_format_gradevalue($grade->finalgrade, $courseitem, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals = 2);
+                $coursegrade->letter = grade_format_gradevalue($grade->finalgrade, $courseitem, true, GRADE_DISPLAY_TYPE_LETTER, $decimals = 0);
 
                 if ($certificate->gradefmt == 1) {
                     $grade = $strprefix . $coursegrade->percentage;
@@ -971,22 +974,22 @@ function certificate_get_grade($certificate, $course, $userid = null, $valueonly
             }
         }
     } else if ($certificate->printgrade < 0) { // Must be a category id.
-        if ($category_item = grade_item::fetch(array('itemtype' => 'category', 'iteminstance' => -$certificate->printgrade))) {
-            $category_item->gradetype = GRADE_TYPE_VALUE;
+        if ($categoryitem = grade_item::fetch(['itemtype' => 'category', 'iteminstance' => -$certificate->printgrade])) {
+            $categoryitem->gradetype = GRADE_TYPE_VALUE;
 
-            $grade = new grade_grade(array('itemid' => $category_item->id, 'userid' => $userid));
+            $grade = new grade_grade(['itemid' => $categoryitem->id, 'userid' => $userid]);
 
-            $category_grade = new stdClass;
-            $category_grade->points = grade_format_gradevalue($grade->finalgrade, $category_item, true, GRADE_DISPLAY_TYPE_REAL, $decimals = 2);
-            $category_grade->percentage = grade_format_gradevalue($grade->finalgrade, $category_item, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals = 2);
-            $category_grade->letter = grade_format_gradevalue($grade->finalgrade, $category_item, true, GRADE_DISPLAY_TYPE_LETTER, $decimals = 0);
+            $categorygrade = new stdClass;
+            $categorygrade->points = grade_format_gradevalue($grade->finalgrade, $categoryitem, true, GRADE_DISPLAY_TYPE_REAL, $decimals = 2);
+            $categorygrade->percentage = grade_format_gradevalue($grade->finalgrade, $categoryitem, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals = 2);
+            $categorygrade->letter = grade_format_gradevalue($grade->finalgrade, $categoryitem, true, GRADE_DISPLAY_TYPE_LETTER, $decimals = 0);
 
             if ($certificate->gradefmt == 1) {
-                $formattedgrade = $category_grade->percentage;
+                $formattedgrade = $categorygrade->percentage;
             } else if ($certificate->gradefmt == 2) {
-                $formattedgrade = $category_grade->points;
+                $formattedgrade = $categorygrade->points;
             } else if ($certificate->gradefmt == 3) {
-                $formattedgrade = $category_grade->letter;
+                $formattedgrade = $categorygrade->letter;
             }
 
             return $formattedgrade;
@@ -1007,11 +1010,11 @@ function certificate_get_outcome($certificate, $course) {
     global $USER;
 
     if ($certificate->printoutcome > 0) {
-        if ($grade_item = new grade_item(array('id' => $certificate->printoutcome))) {
+        if ($gradeitem = new grade_item(['id' => $certificate->printoutcome])) {
             $outcomeinfo = new stdClass;
-            $outcomeinfo->name = $grade_item->get_name();
-            $outcome = new grade_grade(array('itemid' => $grade_item->id, 'userid' => $USER->id));
-            $outcomeinfo->grade = grade_format_gradevalue($outcome->finalgrade, $grade_item, true, GRADE_DISPLAY_TYPE_REAL);
+            $outcomeinfo->name = $gradeitem->get_name();
+            $outcome = new grade_grade(['itemid' => $gradeitem->id, 'userid' => $USER->id]);
+            $outcomeinfo->grade = grade_format_gradevalue($outcome->finalgrade, $gradeitem, true, GRADE_DISPLAY_TYPE_REAL);
 
             return $outcomeinfo->name . ': ' . $outcomeinfo->grade;
         }
@@ -1063,38 +1066,38 @@ function certificate_print_text($pdf, $x, $y, $align, $font='freeserif', $style,
 function certificate_draw_frame($pdf, $certificate) {
     if ($certificate->bordercolor > 0) {
         if ($certificate->bordercolor == 1) {
-            $color = array(0, 0, 0); // black
+            $color = [0, 0, 0]; // black
         }
         if ($certificate->bordercolor == 2) {
-            $color = array(153, 102, 51); // brown
+            $color = [153, 102, 51]; // brown
         }
         if ($certificate->bordercolor == 3) {
-            $color = array(0, 51, 204); // blue
+            $color = [0, 51, 204]; // blue
         }
         if ($certificate->bordercolor == 4) {
-            $color = array(0, 180, 0); // green
+            $color = [0, 180, 0]; // green
         }
         switch ($certificate->orientation) {
             case 'L':
                 // create outer line border in selected color
-                $pdf->SetLineStyle(array('width' => 1.5, 'color' => $color));
+                $pdf->SetLineStyle(['width' => 1.5, 'color' => $color]);
                 $pdf->Rect(10, 10, 277, 190);
                 // create middle line border in selected color
-                $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
+                $pdf->SetLineStyle(['width' => 0.2, 'color' => $color]);
                 $pdf->Rect(13, 13, 271, 184);
                 // create inner line border in selected color
-                $pdf->SetLineStyle(array('width' => 1.0, 'color' => $color));
+                $pdf->SetLineStyle(['width' => 1.0, 'color' => $color]);
                 $pdf->Rect(16, 16, 265, 178);
                 break;
             case 'P':
                 // create outer line border in selected color
-                $pdf->SetLineStyle(array('width' => 1.5, 'color' => $color));
+                $pdf->SetLineStyle(['width' => 1.5, 'color' => $color]);
                 $pdf->Rect(10, 10, 190, 277);
                 // create middle line border in selected color
-                $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
+                $pdf->SetLineStyle(['width' => 0.2, 'color' => $color]);
                 $pdf->Rect(13, 13, 184, 271);
                 // create inner line border in selected color
-                $pdf->SetLineStyle(array('width' => 1.0, 'color' => $color));
+                $pdf->SetLineStyle(['width' => 1.0, 'color' => $color]);
                 $pdf->Rect(16, 16, 178, 265);
                 break;
         }
@@ -1110,38 +1113,38 @@ function certificate_draw_frame($pdf, $certificate) {
 function certificate_draw_frame_letter($pdf, $certificate) {
     if ($certificate->bordercolor > 0) {
         if ($certificate->bordercolor == 1)    {
-            $color = array(0, 0, 0); //black
+            $color = [0, 0, 0]; // black
         }
         if ($certificate->bordercolor == 2)    {
-            $color = array(153, 102, 51); //brown
+            $color = [153, 102, 51]; // brown
         }
         if ($certificate->bordercolor == 3)    {
-            $color = array(0, 51, 204); //blue
+            $color = [0, 51, 204]; // blue
         }
         if ($certificate->bordercolor == 4)    {
-            $color = array(0, 180, 0); //green
+            $color = [0, 180, 0]; // green
         }
         switch ($certificate->orientation) {
             case 'L':
                 // create outer line border in selected color
-                $pdf->SetLineStyle(array('width' => 4.25, 'color' => $color));
+                $pdf->SetLineStyle(['width' => 4.25, 'color' => $color]);
                 $pdf->Rect(28, 28, 736, 556);
                 // create middle line border in selected color
-                $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
+                $pdf->SetLineStyle(['width' => 0.2, 'color' => $color]);
                 $pdf->Rect(37, 37, 718, 538);
                 // create inner line border in selected color
-                $pdf->SetLineStyle(array('width' => 2.8, 'color' => $color));
+                $pdf->SetLineStyle(['width' => 2.8, 'color' => $color]);
                 $pdf->Rect(46, 46, 700, 520);
                 break;
             case 'P':
                 // create outer line border in selected color
-                $pdf->SetLineStyle(array('width' => 1.5, 'color' => $color));
+                $pdf->SetLineStyle(['width' => 1.5, 'color' => $color]);
                 $pdf->Rect(25, 20, 561, 751);
                 // create middle line border in selected color
-                $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
+                $pdf->SetLineStyle(['width' => 0.2, 'color' => $color]);
                 $pdf->Rect(40, 35, 531, 721);
                 // create inner line border in selected color
-                $pdf->SetLineStyle(array('width' => 1.0, 'color' => $color));
+                $pdf->SetLineStyle(['width' => 1.0, 'color' => $color]);
                 $pdf->Rect(51, 46, 509, 699);
                 break;
         }
@@ -1213,7 +1216,7 @@ function certificate_generate_code() {
     $uniquecodefound = false;
     $code = random_string(10);
     while (!$uniquecodefound) {
-        if (!$DB->record_exists('certificate_issues', array('code' => $code))) {
+        if (!$DB->record_exists('certificate_issues', ['code' => $code])) {
             $uniquecodefound = true;
         } else {
             $code = random_string(10);
@@ -1231,7 +1234,7 @@ function certificate_generate_code() {
  */
 function certificate_scan_image_dir($path) {
     // Array to store the images
-    $options = array();
+    $options = [];
 
     // Start to scan directory
     if (is_dir($path)) {
@@ -1239,7 +1242,7 @@ function certificate_scan_image_dir($path) {
         foreach ($iterator as $fileinfo) {
             $filename = $fileinfo->getFilename();
             $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-            if ($fileinfo->isFile() && in_array($extension, array('png', 'jpg', 'jpeg'))) {
+            if ($fileinfo->isFile() && in_array($extension, ['png', 'jpg', 'jpeg'])) {
                 $options[$filename] = pathinfo($filename, PATHINFO_FILENAME);
             }
         }
@@ -1257,10 +1260,10 @@ function certificate_scan_image_dir($path) {
  */
 function certificate_get_certificate_filename($certificate, $cm, $course) {
     $coursecontext = context_course::instance($course->id);
-    $coursename = format_string($course->shortname, true, array('context' => $coursecontext));
+    $coursename = format_string($course->shortname, true, ['context' => $coursecontext]);
 
     $context = context_module::instance($cm->id);
-    $name = format_string($certificate->name, true, array('context' => $context));
+    $name = format_string($certificate->name, true, ['context' => $context]);
 
     $filename = $coursename . '_' . $name;
     $filename = core_text::entities_to_utf8($filename);
